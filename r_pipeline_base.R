@@ -178,8 +178,31 @@ alunos_recorte %>%
   filter(janela_1999_p1 | janela_2017_p1) %>%
   count(grupo_curricular, situacao_final)
 
+#### 
+names(alunos_recorte)
 
-# Verificação
-alunos_recorte %>%
-  filter(is.na(grupo_curricular)) %>%
-  count(Curriculo, `periodo_ingresso`)
+count(alunos_recorte, grupo_curricular, situacao_final)
+
+# Alunos fora dos intervalos de recorte
+nrow(alunos_recorte)
+count(alunos_recorte, is.na(grupo_curricular))
+
+# 
+alunos_recorte <- alunos_recorte %>%
+  mutate(
+    grupo_curricular = case_when(
+      is.na(grupo_curricular) ~ "FORA_RECORTE",
+      TRUE ~ grupo_curricular
+    )
+  )
+
+count(alunos_recorte, grupo_curricular, situacao_final)
+
+# checkpoint
+base_analitica <- alunos_recorte %>%
+  filter(grupo_curricular %in% c("PRE_REFORMA", "POS_REFORMA"))
+base_completa <- alunos_recorte
+
+nrow(base_analitica)
+nrow(base_completa)
+names(base_completa)
