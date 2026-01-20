@@ -82,4 +82,23 @@ count(alunos_padrao, sexo)
 # Cor / Raça
 count(alunos_padrao, cor)
 
+# RECORTE ANALÍTICO DA BASE PARA EVASÃO
+# BLOCO 5 — DEFINIÇÃO DA SITUAÇÃO FINAL DO ESTUDANTE
+
+alunos_recorte <- alunos_padrao %>%
+  mutate(
+    situacao_final = case_when(
+      status == "ATIVO" ~ "ATIVO",
+      tipo_de_evasao == "GRADUADO" ~ "CONCLUIDO",
+      tipo_de_evasao %in% c(
+        "CANCELAMENTO POR ABANDONO",
+        "CANCELAMENTO P SOLICITACAO ALUNO"
+      ) ~ "EVADIDO",
+      TRUE ~ "OUTROS"
+    )
+  )
+
+# Verificação
+count(alunos_recorte, situacao_final)
+
 
