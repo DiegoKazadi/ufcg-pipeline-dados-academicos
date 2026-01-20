@@ -23,7 +23,9 @@ fatores acadêmicos e demográficos observáveis.
 
 Este projeto está diretamente vinculado a uma dissertação de mestrado, seguindo princípios de reprodutibilidade e rigor metodológico.
 
-🗂️ Estrutura do Repositório
+## 🗂️ Estrutura do Repositório
+
+```text
 Tabelas_Analise/
 ├── data/
 │   ├── raw/              # Dados brutos (sem tratamento)
@@ -39,14 +41,14 @@ Tabelas_Analise/
 │   └── 06_report_generation.R    # Geração de relatórios
 │
 ├── config/
-│   └── parameters.yaml    # Parâmetros gerais do pipeline
+│   └── parameters.yaml           # Parâmetros gerais do pipeline
 │
 ├── outputs/
-│   ├── tables/            # Tabelas finais de resultados
-│   ├── figures/           # Figuras e gráficos
-│   └── reports/           # Relatórios (PDF / HTML)
+│   ├── tables/                   # Tabelas finais de resultados
+│   ├── figures/                  # Figuras e gráficos
+│   └── reports/                  # Relatórios (PDF / HTML)
 │
-└── README.md              # Documentação do projeto
+└── README.md                     # Documentação do projeto
 
 🧪 Configuração das Coortes de Análise
 
