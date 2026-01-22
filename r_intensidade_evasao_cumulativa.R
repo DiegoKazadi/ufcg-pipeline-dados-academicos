@@ -16,3 +16,27 @@ tabela_evasao_cumulativa <- base_analitica %>%
   )
 
 tabela_evasao_cumulativa
+
+# GRÁFICO DA EVASÃO CUMULATIVA
+
+ggplot(tabela_evasao_cumulativa,
+       aes(x = grupo_curricular,
+           y = intensidade_evasao,
+           fill = grupo_curricular)) +
+  geom_col(width = 0.6) +
+  geom_text(
+    aes(label = paste0(intensidade_evasao, "%")),
+    vjust = -0.5,
+    size = 4
+  ) +
+  labs(
+    title = "Comparação da Intensidade da Evasão Cumulativa",
+    subtitle = "Currículos Pré-Reforma (1999) e Pós-Reforma (2017)",
+    x = "Grupo Curricular",
+    y = "Intensidade da Evasão (%)"
+  ) +
+  theme_minimal() +
+  theme(
+    legend.position = "none",
+    plot.title = element_text(face = "bold")
+  )
