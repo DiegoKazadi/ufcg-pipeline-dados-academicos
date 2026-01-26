@@ -206,3 +206,4 @@ base_completa <- alunos_recorte
 nrow(base_analitica)
 nrow(base_completa)
 names(base_completa)
+
