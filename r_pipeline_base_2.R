@@ -1,8 +1,16 @@
+# 0 Instalação
+
+install.packages("tidyverse")
+install.packages("janitor")
+install.packages("lubridate")
+
+
 # 1. PACOTES
 library(tidyverse)
 library(janitor)
 library(lubridate)
 library(readr)
+library(dplyr)
 
 # 2. PARÂMETROS GERAIS DO ESTUDO
 
@@ -44,6 +52,15 @@ alunos_raw <- read_csv(
   "C:/Users/Big Data/Documents/Master UFCG/Semestre 2025.2/Tabelas/alunos-final.csv",
   show_col_types = FALSE
 )
+
+# 4. CARREGAMENTO DA BASE linux
+caminho_base <- "/home/diego/Documentos/Tabelas"
+
+alunos_raw <- read_csv(
+  file.path(caminho_base, "alunos-final.csv"),
+  show_col_types = FALSE
+)
+
 
 # 5. PADRONIZAÇÃO DA BASE
 
@@ -122,3 +139,4 @@ table(alunos_pronto_analise$periodo_analise)
 # Ingressos por coorte
 alunos_pronto_analise %>%
   count(curriculo, periodo_ingresso_num)
+
