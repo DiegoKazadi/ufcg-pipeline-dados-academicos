@@ -56,24 +56,32 @@ alunos_raw <- read_csv(
 # 4. CARREGAMENTO DA BASE linux
 caminho_base <- "/home/diego/Documentos/Tabelas"
 
-alunos_raw <- read_csv(
+alunos_raw <- read_csv2(
   file.path(caminho_base, "alunos-final.csv"),
   show_col_types = FALSE
 )
 
+# INSPEÇÃO INICIAL DA BASE 
 
-# 5. PADRONIZAÇÃO DA BASE
+dim(alunos_raw)
+glimpse(alunos_raw)
+names(alunos_raw)
+
+
+# 5. PADRONIZAÇÃO DA BASE 
 
 alunos_base <- alunos_raw %>%
-  clean_names() %>%                     # padroniza nomes
+  clean_names() %>%
+  separate(periodo_de_ingresso,
+           into = c("ano_ingresso", "periodo_ingresso"),
+           sep = "\\.",
+           convert = TRUE) %>%
   mutate(
-    ano_ingresso      = as.integer(ano_ingresso),
-    periodo_ingresso  = as.integer(periodo_ingresso),
     periodo_ingresso_num = criar_periodo(ano_ingresso, periodo_ingresso),
-    
     curriculo = classificar_curriculo(ano_ingresso, periodo_ingresso)
   ) %>%
-  filter(!is.na(curriculo))              # remove fora do escopo do estudo
+  filter(!is.na(curriculo))
+
 
 # 6. DEFINIÇÃO DOS CORTES POR PERÍODO (1º ao 4º)
 
@@ -101,6 +109,7 @@ definir_janela_periodo <- function(curriculo, periodo_n) {
     )
 }
 
+
 # 7. BASES PRONTAS PARA ANÁLISE (LISTA)
 
 bases_analise <- list()
@@ -124,19 +133,45 @@ for (curr in c("1999", "2017")) {
   }
 }
 
-# 8. BASE MESTRA (PRONTA PARA DIFERENTES ANÁLISES)
 
-alunos_pronto_analise <- bind_rows(bases_analise)
 
-# 9. CHECAGENS BÁSICAS DE QUALIDADE
+# Dimensão
+dim(alunos_base)
 
-# Distribuição por currículo
-table(alunos_pronto_analise$curriculo)
+# Estrutura das variáveis
+glimpse(alunos_base)
 
-# Distribuição por período de análise
-table(alunos_pronto_analise$periodo_analise)
+# Tipos das variáveis
+sapply(alunos_base, class)
 
-# Ingressos por coorte
-alunos_pronto_analise %>%
-  count(curriculo, periodo_ingresso_num)
+# Frequência por currículo
+table(alunos_base$curriculo)
+
+# Distribuição percentual
+prop.table(table(alunos_base$curriculo)) * 100
+
+summary(alunos_base$periodo_ingresso_num)
+
+# Mínimo e máximo por currículo
+alunos_base %>%
+  group_by(curriculo) %>%
+  summarise(
+    min_periodo = min(periodo_ingresso_num),
+    max_periodo = max(periodo_ingresso_num),
+    n = n()
+  )
+table(alunos_base$status)
+
+alunos_base %>%
+  count(curriculo, status) %>%
+  group_by(curriculo) %>%
+  mutate(percentual = round(n/sum(n)*100, 2))
+
+names(bases_analise)
+
+# Exemplo: visualizar uma base específica
+glimpse(bases_analise$curr_1999_p1)
+
+# Tamanho de cada base
+sapply(bases_analise, nrow)
 
