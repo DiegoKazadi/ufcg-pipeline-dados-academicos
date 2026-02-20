@@ -1,6 +1,3 @@
-# ===============================
-#  5.10.2 — EVASÃO CUMULATIVA POR VARIÁVEIS ACADÊMICAS
-# ===============================
 # Verificar nome da coluna antes
 names(base_analitica)
 # ===============================
@@ -212,3 +209,4 @@ ggsave("grafico_evasao_periodo.png",
        grafico_periodo,
        width = 8, height = 5,
        dpi = 300)
+
