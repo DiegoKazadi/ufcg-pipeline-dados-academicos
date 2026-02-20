@@ -6,9 +6,7 @@ library(tidyverse)
 library(scales)
 library(tidyr)
 
-# ===============================
-# AJUSTA LABEL DE CURRÍCULO
-# ===============================
+# CURRÍCULO
 
 base_analitica <- base_analitica %>% 
   mutate(
@@ -195,3 +193,117 @@ print(tabela_evasao_faixa, n = Inf)
 
 # Ou abrir a tabela em uma visualização interativa
 View(tabela_evasao_faixa)
+
+### Formatar as tabelas
+library(tidyr)
+library(dplyr)
+
+# Supondo que sua tabela de faixa etária se chame 'tabela_evasao_faixa'
+tabela_faixa_wide <- tabela_evasao_faixa %>%
+  select(Curriculo, Faixa_Etaria, Periodo, 
+         Taxa = Taxa_Evasao_Cumulativa_percent, 
+         Total_Ingressantes) %>%
+  pivot_wider(
+    names_from = Periodo,
+    values_from = Taxa,
+    names_prefix = "Período "
+  ) %>%
+  # A coluna Total_Ingressantes é constante para cada grupo, então será mantida
+  arrange(Curriculo, Faixa_Etaria)
+
+# Visualizar a tabela
+print(tabela_faixa_wide)
+
+# Gerar graficos
+
+# Gráfico de evasão cumulativa por faixa etária
+library(ggplot2)
+library(scales)
+
+# No objeto evasao_faixa, a coluna 'taxa_evasao_cumulativa' já está em proporção.
+# Vamos usá-la.
+
+grafico_faixa <- ggplot(evasao_faixa, 
+                        aes(x = periodo, y = taxa_evasao_cumulativa, 
+                            color = Grupo, group = Grupo)) +
+  geom_line(linewidth = 1) +
+  geom_point(size = 2.5) +
+  scale_y_continuous(labels = percent_format(accuracy = 1)) +
+  scale_x_continuous(breaks = 1:4) +
+  labs(
+    title = "Evasão Cumulativa por Faixa Etária",
+    subtitle = "Comparação entre Currículos 1999 e 2017",
+    x = "Período",
+    y = "Taxa Cumulativa de Evasão",
+    color = "Faixa Etária"
+  ) +
+  facet_wrap(~ Curriculo) +
+  theme_minimal(base_size = 12) +
+  theme(
+    legend.position = "bottom",
+    panel.grid.minor = element_blank(),
+    strip.background = element_rect(fill = "lightgray", color = NA),
+    strip.text = element_text(face = "bold")
+  )
+
+print(grafico_faixa)
+
+# Salvar em alta resolução
+ggsave("evasao_faixa_etaria.png", plot = grafico_faixa, 
+       width = 10, height = 6, dpi = 300, bg = "white")
+
+
+library(tidyr)
+library(dplyr)
+
+# Transformar a tabela longa em wide com os percentuais por período
+tabela_sexo_wide <- tabela_evasao_sexo %>%
+  select(Curriculo, Sexo, Periodo, 
+         Taxa = Taxa_Evasao_Cumulativa_percent, 
+         Total_Ingressantes) %>%
+  pivot_wider(
+    names_from = Periodo,
+    values_from = Taxa,
+    names_prefix = "Período "
+  ) %>%
+  arrange(Curriculo, Sexo)
+
+# Visualizar
+print(tabela_sexo_wide)
+
+library(ggplot2)
+library(scales)
+library(dplyr)  # necessário para o pipe e manipulação
+
+# Garantir que a coluna Curriculo seja fator, se desejar ordenar (opcional)
+# tabela_evasao_sexo <- tabela_evasao_sexo %>%
+#   mutate(Curriculo = factor(Curriculo, levels = c("Currículo 1999", "Currículo 2017")))
+
+grafico_sexo <- tabela_evasao_sexo %>%
+  ggplot(aes(x = Periodo, y = Taxa_Evasao_Cumulativa_percent, 
+             color = Sexo, group = Sexo)) +
+  geom_line(linewidth = 1.2) +
+  geom_point(size = 2.8) +
+  scale_x_continuous(breaks = 1:4) +
+  scale_y_continuous(labels = function(x) paste0(x, "%")) +
+  labs(
+    title = "Evasão Cumulativa por Sexo",
+    x = "Período",
+    y = "Taxa de Evasão Cumulativa (%)",
+    color = "Sexo"
+  ) +
+  facet_wrap(~ Curriculo) +
+  theme_minimal(base_size = 12) +
+  theme(
+    legend.position = "bottom",
+    panel.grid.minor = element_blank(),
+    # Caixa cinza no título do facet
+    strip.background = element_rect(fill = "lightgray", color = NA),
+    strip.text = element_text(face = "bold")
+  )
+
+# Exibir o gráfico
+print(grafico_sexo)
+
+# Salvar (opcional)
+ggsave("grafico_evasao_sexo.png", grafico_sexo, width = 8, height = 5, dpi = 300)
