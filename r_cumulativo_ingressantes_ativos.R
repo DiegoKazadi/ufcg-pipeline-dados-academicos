@@ -1,6 +1,4 @@
-# ======================================================
 # BLOCO 10 — FUNÇÕES PARA TAXA CUMULATIVA
-# ======================================================
 
 # 1. Função para computar números agregados (ingressantes, ativos, evasão acumulada)
 calcular_cumulativo <- function(df, janela_logica, nome_periodo) {
@@ -47,18 +45,14 @@ result_2017 <- bind_rows(
 ) %>% mutate(curriculo = "2017")
 
 
-# ======================================================
 # BLOCO 12 — TABELA FINAL COMPARATIVA
-# ======================================================
 
 tabela_cumulativa <- bind_rows(result_1999, result_2017) %>%
   select(curriculo, everything())
 
 tabela_cumulativa
 
-# ======================================================
 # BLOCO 13 — PLOT (PRONTO PARA USAR)
-# ======================================================
 
 library(ggplot2)
 

@@ -1,16 +1,10 @@
-# =========================================================
 # PARTE II — TAXAS ACUMULADAS E VISUALIZAÇÕES
-# Curso de Ciência da Computação – UFCG
-# =========================================================
 
-# =========================================================
 # 1. PACOTES
-# =========================================================
 library(tidyverse)
 library(DT)
 library(scales)
 
-# =========================================================
 # 2. PRESSUPOSTO DE ENTRADA
 # =========================================================
 # Espera-se que a base abaixo JÁ EXISTA no ambiente:
@@ -21,13 +15,13 @@ library(scales)
 # - periodo           (1, 2, 3, 4 ou equivalente)
 # - situacao_final    ("ATIVO", "EVADIDO", "CONCLUIDO")
 
-# Conferência inicial
-glimpse(alunos-final)
+pasta_dados   <- "C:/Users/Big Data/Documents/Master UFCG/Semestre 2025.2/Tabelas"
+base_objetiva <- "alunos-final"
 
 # =========================================================
 # 3. PADRONIZAÇÃO DO PERÍODO
 # =========================================================
-alunos_final <- alunos_final %>%
+base_objetiva <- base_objetiva %>%
   mutate(
     periodo = as.integer(periodo),
     periodo_rotulo = case_when(
