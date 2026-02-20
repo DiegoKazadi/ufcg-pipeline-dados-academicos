@@ -1,134 +1,88 @@
-# Verificar nome da coluna antes
-names(base_analitica)
 # ==========================================================
-# 5.10.2 — EVASÃO CUMULATIVA POR VARIÁVEIS ACADÊMICAS
+# 5.10.2 — COMPOSIÇÃO DOS TIPOS DE EVASÃO ATÉ O 4º PERÍODO
+# ==========================================================
+library(tidyverse)
+library(scales)
 
-# =========================
-# 1) PACOTES
-# =========================
-library(dplyr)
-library(stringr)
-library(ggplot2)
-library(tidyr)
-
-# =========================
-# 2) PADRONIZACAO DOS TIPOS
-# =========================
+# 1) Criar categorias macro de evasão (caso não existam)
 base_analitica <- base_analitica %>%
   mutate(
     tipo_evasao_macro = case_when(
-      tipo_de_evasao == "GRADUADO" ~ "Concluído",
-      tipo_de_evasao == "REGULAR" ~ "Ativo",
       str_detect(tipo_de_evasao, "ABANDONO") ~ "Abandono",
       str_detect(tipo_de_evasao, "SOLICITACAO") ~ "Desistência Formal",
       str_detect(tipo_de_evasao, "REPROV") ~ "Desligamento Acadêmico",
       str_detect(tipo_de_evasao, "MUDANCA|TRANSFERIDO|NOVO INGRESSO") ~ "Mobilidade",
-      TRUE ~ "Outros"
+      TRUE ~ tipo_de_evasao  # mantém outras categorias se houver
     )
   )
 
-# =========================
-# 3) FILTRO – 1º AO 4º PERIODO
-# =========================
+# 2) Filtrar apenas evasões ocorridas até o 4º período
+#    (exclui graduados e regulares)
 evasao_4p <- base_analitica %>%
-  filter(periodo <= 4) %>%
-  filter(!tipo_evasao_macro %in% c("Ativo", "Concluído"))
+  filter(
+    tipo_de_evasao != "GRADUADO",
+    tipo_de_evasao != "REGULAR",
+    !is.na(periodo_evasao_relativo),
+    periodo_evasao_relativo <= 4,
+    !is.na(grupo_curricular)
+  )
 
-# =========================
-# 4) TABELA – TIPO DE EVASAO
-# =========================
+# 3) Tabela de composição por currículo e tipo macro
 tabela_tipo <- evasao_4p %>%
-  group_by(grupo_curricular, tipo_evasao_macro) %>%
-  summarise(n = n(), .groups = "drop") %>%
-  group_by(grupo_curricular) %>%
+  count(Curriculo = grupo_curricular, 
+        Tipo = tipo_evasao_macro) %>%
+  group_by(Curriculo) %>%
   mutate(
-    Percentual = round(100 * n / sum(n), 2)
+    Percentual = round(n / sum(n) * 100, 2),
+    # Formatação para exibição
+    `N (evadidos)` = n,
+    `%` = Percentual
   ) %>%
-  arrange(grupo_curricular, desc(n))
+  ungroup() %>%
+  select(Curriculo, Tipo, `N (evadidos)`, `%`) %>%
+  arrange(Curriculo, desc(`%`))
 
-print(tabela_tipo)
+# Exibir a tabela completa
+print(tabela_tipo, n = Inf)
 
-# =========================
-# 5) GRAFICO – TIPO DE EVASAO
-# =========================
-grafico_tipo <- ggplot(tabela_tipo,
-                       aes(x = reorder(tipo_evasao_macro, Percentual),
-                           y = Percentual,
-                           fill = grupo_curricular)) +
-  geom_col(position = "dodge") +
+# 4) Tabela em formato wide (se preferir comparar os percentuais entre currículos)
+tabela_tipo_wide <- tabela_tipo %>%
+  select(Curriculo, Tipo, `%`) %>%
+  pivot_wider(
+    names_from = Curriculo,
+    values_from = `%`,
+    values_fill = 0
+  ) %>%
+  rename(`Tipo de Evasão` = Tipo)
+
+print(tabela_tipo_wide)
+
+# 5) Gráfico de barras comparativo
+grafico_tipo <- tabela_tipo %>%
+  ggplot(aes(x = reorder(Tipo, `%`), 
+             y = `%`, 
+             fill = Curriculo)) +
+  geom_col(position = position_dodge(width = 0.8), width = 0.7) +
   coord_flip() +
+  scale_fill_manual(values = c("Currículo 1999" = "#1f77b4", 
+                               "Currículo 2017" = "#ff7f0e")) +
   labs(
-    title = "Distribuição dos Tipos de Evasão (1º ao 4º Período)",
-    x = "Tipo de Evasão",
+    title = "Composição dos Tipos de Evasão",
+    subtitle = "Distribuição percentual dentro de cada currículo",
+    x = NULL,
     y = "Percentual (%)",
     fill = "Currículo"
   ) +
-  theme_minimal() +
+  theme_minimal(base_size = 13) +
   theme(
-    text = element_text(size = 12),
+    legend.position = "bottom",
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor = element_blank(),
     plot.title = element_text(face = "bold")
   )
 
 print(grafico_tipo)
 
-# =========================
-# 6) TABELA – PERIODO DE EVASAO
-# =========================
-tabela_periodo <- evasao_4p %>%
-  group_by(grupo_curricular, periodo) %>%
-  summarise(n = n(), .groups = "drop") %>%
-  group_by(grupo_curricular) %>%
-  mutate(
-    Percentual = round(100 * n / sum(n), 2),
-    Acumulado = round(cumsum(Percentual), 2)
-  )
-
-print(tabela_periodo)
-
-# =========================
-# 7) GRAFICO – EVASAO ACUMULADA POR PERIODO
-# =========================
-grafico_periodo <- ggplot(tabela_periodo,
-                          aes(x = periodo,
-                              y = Acumulado,
-                              color = grupo_curricular)) +
-  geom_line(size = 1.2) +
-  geom_point(size = 3) +
-  scale_x_continuous(breaks = 1:4) +
-  labs(
-    title = "Evasão Acumulada por Período (1º ao 4º)",
-    x = "Período",
-    y = "Percentual Acumulado (%)",
-    color = "Currículo"
-  ) +
-  theme_minimal() +
-  theme(
-    text = element_text(size = 12),
-    plot.title = element_text(face = "bold")
-  )
-
-print(grafico_periodo)
-
-# =========================
-# 8) HEATMAP – PERIODO x TIPO
-# =========================
-heatmap_data <- evasao_4p %>%
-  group_by(grupo_curricular, periodo, tipo_evasao_macro) %>%
-  summarise(n = n(), .groups = "drop")
-
-grafico_heatmap <- ggplot(heatmap_data,
-                          aes(x = periodo,
-                              y = tipo_evasao_macro,
-                              fill = n)) +
-  geom_tile() +
-  facet_wrap(~grupo_curricular) +
-  scale_fill_gradient(low = "white", high = "darkred") +
-  labs(
-    title = "Intensidade de Evasão por Período e Tipo",
-    x = "Período",
-    y = "Tipo de Evasão"
-  ) +
-  theme_minimal()
-
-print(grafico_heatmap)
-
+# Salvar (opcional)
+# ggsave("grafico_tipos_evasao.png", grafico_tipo, width = 8, height = 5, dpi = 300)
+# write.csv2(tabela_tipo, "tabela_tipos_evasao.csv", row.names = FALSE)
