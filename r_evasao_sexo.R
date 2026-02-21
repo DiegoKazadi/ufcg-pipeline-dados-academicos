@@ -49,7 +49,7 @@ ggplot(evasao_sexo,
   geom_point(size = 3) +
   scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
   labs(
-    title = "Taxa de evasão por sexo nos quatro primeiros períodos",
+    title = "Taxa de evasão por sexo ",
     x = "Período do Curso",
     y = "Taxa de Evasão",
     color = "Sexo"
