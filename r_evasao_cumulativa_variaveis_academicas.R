@@ -86,3 +86,30 @@ print(grafico_tipo)
 # Salvar (opcional)
 # ggsave("grafico_tipos_evasao.png", grafico_tipo, width = 8, height = 5, dpi = 300)
 # write.csv2(tabela_tipo, "tabela_tipos_evasao.csv", row.names = FALSE)
+
+# 5) Gráfico de linhas comparativo
+grafico_tipo <- tabela_tipo %>%
+  ggplot(aes(x = Tipo, 
+             y = `%`, 
+             group = Curriculo, 
+             color = Curriculo)) +
+  geom_line(size = 1.1) +
+  geom_point(size = 3) +
+  scale_color_manual(values = c("Currículo 1999" = "#1f77b4", 
+                                "Currículo 2017" = "#ff7f0e")) +
+  labs(
+    title = "Composição dos Tipos de Evasão",
+    subtitle = "Distribuição percentual até o 4º período",
+    x = "Tipo de Evasão",
+    y = "Percentual (%)",
+    color = "Currículo"
+  ) +
+  theme_minimal(base_size = 13) +
+  theme(
+    legend.position = "bottom",
+    panel.grid.minor = element_blank(),
+    plot.title = element_text(face = "bold"),
+    axis.text.x = element_text(angle = 30, hjust = 1)
+  )
+
+print(grafico_tipo)
