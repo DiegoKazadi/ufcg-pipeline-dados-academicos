@@ -86,37 +86,43 @@ ggplot(evasao_sexo,
   )
 
 # ======================================================
-# BLOCO 15 — ALUNOS ATIVOS POR PERÍODO DE INGRESSO
+# BLOCO 15 — ALUNOS ATIVOS POR PERÍODO E CURRÍCULO
 # ======================================================
 
-library(dplyr)
-library(ggplot2)
-
-ativos_por_ingresso <- base_completa %>%
-  filter(situacao_final == "ATIVO") %>%
-  group_by(periodo_ingresso) %>%
+ativos_por_ingresso_curriculo <- base_completa %>%
+  filter(situacao_final == "ATIVO",
+         grupo_curricular %in% c("PRE_REFORMA","POS_REFORMA")) %>%
+  group_by(periodo_ingresso, grupo_curricular) %>%
   summarise(
     total_ativos = n(),
     .groups = "drop"
   ) %>%
   arrange(periodo_ingresso)
 
-glimpse(ativos_por_ingresso)
+glimpse(ativos_por_ingresso_curriculo)
 
 # ======================================================
-# GRÁFICO — ALUNOS ATIVOS AO LONGO DOS INGRESSOS
+# GRÁFICO — ATIVOS POR INGRESSO E CURRÍCULO
 # ======================================================
 
-ggplot(ativos_por_ingresso,
+ggplot(ativos_por_ingresso_curriculo,
        aes(x = periodo_ingresso,
            y = total_ativos,
-           group = 1)) +
-  geom_line(size = 1.2, color = "#2C3E50") +
-  geom_point(size = 2, color = "#2C3E50") +
+           color = grupo_curricular,
+           group = grupo_curricular)) +
+  geom_line(size = 1.2) +
+  geom_point(size = 2) +
   labs(
     title = "Evolução do Número de Alunos Ativos por Período de Ingresso",
     x = "Período de Ingresso",
-    y = "Número de Alunos Ativos"
+    y = "Número de Alunos Ativos",
+    color = "Currículo"
+  ) +
+  scale_color_manual(
+    values = c("PRE_REFORMA" = "#1F77B4",
+               "POS_REFORMA" = "#D62728"),
+    labels = c("PRE_REFORMA" = "Currículo 1999",
+               "POS_REFORMA" = "Currículo 2017")
   ) +
   theme_minimal(base_size = 12) +
   theme(
